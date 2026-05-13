@@ -1,97 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JULIA - VISHAL SIR'S PRIVATE AI</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    
     <style>
-        body { background: radial-gradient(circle, #0a0a0a, #000); color: #00e5ff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; margin: 0; overflow: hidden; }
-        #lock-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        #julia-avatar { width: 300px; border-radius: 50%; border: 2px solid #00e5ff; box-shadow: 0 0 30px #00e5ff; transition: 0.5s; }
-        .searching { animation: pulse 2s infinite; filter: grayscale(100%); }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-        #terminal { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); width: 80%; background: rgba(0,255,255,0.05); padding: 20px; border-radius: 10px; border-bottom: 3px solid #00e5ff; text-align: center; font-size: 1.2rem; }
-        input { background: transparent; border: 1px solid #00e5ff; color: #fff; padding: 10px; border-radius: 5px; text-align: center; width: 250px; outline: none; }
+        body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        
+        /* Step 1: Face Scan Circle */
+        #lock-screen { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .scan-circle {
+            width: 250px; height: 250px; border: 3px solid #00e5ff; border-radius: 50%;
+            box-shadow: 0 0 20px #00e5ff; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; margin-bottom: 20px; position: relative;
+        }
+        .scan-line {
+            position: absolute; width: 100%; height: 2px; background: #00e5ff;
+            top: 0; animation: scan 2s infinite linear;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* Step 2: Full Screen Avatar */
+        #julia-main { 
+            display: none; width: 100vw; height: 100vh; 
+            background: url('https://i.ibb.co/L6K6J8m/1000015763.jpg') no-repeat center center;
+            background-size: cover; position: relative;
+        }
+        
+        #terminal {
+            position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%);
+            width: 90%; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 12px;
+            border: 1px solid #00e5ff; text-align: center; font-size: 1.1rem; color: #fff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+        input { background: transparent; border: 1px solid #00e5ff; color: #fff; padding: 12px; border-radius: 5px; width: 85%; outline: none; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="lock-screen">
-    <img id="julia-avatar" src="https://i.postimg.cc/qR0Xm2S0/chizuru-hoodie.jpg"class="searching">
-    <h1 id="status">SCANNING FACE...</h1>
-    <div id="auth-area" style="display:none;">
-        <p>Face Verified. Provide Phrase:</p>
-        <input type="password" id="phraseInput" placeholder="Enter Secret Phrase..." onkeydown="if(event.key==='Enter') verify()">
+    <div id="lock-screen">
+        <div class="scan-circle">
+            <div class="scan-line"></div>
+            <p id="status" style="font-size: 0.8rem;">SCANNING FACE...</p>
+        </div>
+        <h1 id="main-status">VISHAL SIR DETECTED</h1>
+        <div id="auth-area" style="display:none; text-align:center;">
+            <p>Voice Identity Required:</p>
+            <input type="password" id="phraseInput" placeholder="Boliye: Julia i u online..." onkeydown="if(event.key==='Enter') verify()">
+        </div>
     </div>
-</div>
 
-<div id="terminal">
-    <div id="typed-text">Waiting for Vishal sir...</div>
-</div>
+    <div id="julia-main">
+        <div id="terminal">
+            <div id="typed-text">System Booting...</div>
+        </div>
+    </div>
 
-<script>
-   // Force Camera Activation
-async function startCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log("Camera Active");
-    } catch (err) {
-        console.error("Camera Error: ", err);
-    }
-}
-startCamera();
- // Julia's Brain (API Configuration)
-    const API_KEYS = ["AIzaSyDuHe3ryBjUTsogKWNwQlqUh2Lod4C2umI", "AIzaSyAn0MRuEe-9e-LOvRYAwmXmdB7uIyx5dwI"];
-    const GROQ_KEY = "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";
-
-    // Step 1: Simulate Face Recognition (Wait 3 seconds)
-    setTimeout(() => {
-        document.getElementById('status').innerText = "VISHAL SIR DETECTED";
-        document.getElementById('auth-area').style.display = 'block';
-    }, 3000);
-
-    // Step 2: Phrase Verification
-    function verify() {
-        const val = document.getElementById('phraseInput').value;
-        if(val.toLowerCase() === "julia i u online") {
-            unlockJulia();
-        } else {
-            alert("Security Breach! Access Denied.");
+    <script>
+        // --- FORCE CAMERA PERMISSION CODE ---
+        async function unlockCamera() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                console.log("Camera & Mic Unlocked");
+            } catch (err) {
+                console.log("Permission Denied: ", err);
+            }
         }
-    }
+        unlockCamera(); // Auto-run on load
 
-    function unlockJulia() {
-        document.getElementById('lock-screen').style.display = 'none';
-        document.getElementById('julia-avatar').classList.remove('searching');
-        juliaSpeak("Julia is online. Welcome back Vishal sir! I missed you.");
-    }
+        // Lock screen transition
+        setTimeout(() => {
+            document.getElementById('auth-area').style.display = 'block';
+            document.getElementById('status').innerText = "WAITING FOR VOICE...";
+        }, 3000);
 
-    // Step 3: Voice-First Logic
-    function juliaSpeak(text) {
-        // Chizuru Voice Engine
-        const msg = new SpeechSynthesisUtterance();
-        msg.text = text;
-        msg.rate = 1.1; // Chizuru style speed
-        window.speechSynthesis.speak(msg);
-        
-        // Parallel Typing
-        typeText(text);
-    }
+        function verify() {
+            const val = document.getElementById('phraseInput').value;
+            if(val.toLowerCase() === "julia i u online") {
+                unlockJulia();
+            } else {
+                alert("Security Breach! Aap Vishal sir nahi hain.");
+            }
+        }
 
-    function typeText(text) {
-        let i = 0;
-        const target = document.getElementById('typed-text');
-        target.innerHTML = "";
-        const interval = setInterval(() => {
-            if (i < text.length) {
-                target.innerHTML += text.charAt(i);
-                i++;
-            } else { clearInterval(interval); }
-        }, 40);
-    }
-</script>
+        function unlockJulia() {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('julia-main').style.display = 'block';
+            
+            // Julia speaks in Hindi/English Mix
+            let welcomeMessage = "Julia is online. Welcome back Vishal sir! Maine aapko bahut miss kiya. System ab fully operational hai. Bataiye, aaj main aapki kaise help kar sakti hoon?";
+            juliaSpeak(welcomeMessage);
+        }
+
+        function juliaSpeak(text) {
+            const msg = new SpeechSynthesisUtterance(text);
+            // Hindi Voice select karne ki koshish
+            const voices = window.speechSynthesis.getVoices();
+            const hiVoice = voices.find(v => v.lang.includes('hi') || v.lang.includes('IN'));
+            if (hiVoice) msg.voice = hiVoice;
+            
+            msg.rate = 1.0; 
+            msg.pitch = 1.2; // Cute voice
+            window.speechSynthesis.speak(msg);
+            typeText(text);
+        }
+
+        function typeText(text) {
+            let i = 0;
+            const target = document.getElementById('typed-text');
+            target.innerHTML = "";
+            let interval = setInterval(() => {
+                if (i < text.length) {
+                    target.innerHTML += text.charAt(i);
+                    i++;
+                } else { clearInterval(interval); }
+            }, 40);
+        }
+    </script>
 </body>
 </html>
