@@ -1,41 +1,43 @@
-<!DOCTYPE html>
+)<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JULIA - VISHAL SIR'S AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JULIA - VISHAL SIR</title>
     <style>
-        body { background: #000; color: #00e5ff; font-family: sans-serif; margin: 0; overflow: hidden; }
+        /* Redmi 12 5G Full Screen Fix */
+        body { background: #000; color: #00e5ff; font-family: sans-serif; margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; }
         
-        /* Scan Circle Interface */
         #lock-screen { 
             position: fixed; inset: 0; background: #000; z-index: 999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
+        
         .scan-circle {
-            width: 260px; height: 260px; border: 4px solid #00e5ff; border-radius: 50%;
-            box-shadow: 0 0 25px #00e5ff; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; position: relative;
+            width: 70vw; height: 70vw; max-width: 300px; max-height: 300px;
+            border: 4px solid #00e5ff; border-radius: 50%;
+            box-shadow: 0 0 30px #00e5ff; position: relative; overflow: hidden;
         }
+
         .scan-line {
-            position: absolute; width: 100%; height: 3px; background: #00e5ff;
-            top: 0; animation: scan 2.5s infinite linear;
+            position: absolute; width: 100%; height: 4px; background: #00e5ff;
+            top: 0; animation: scan 2s infinite ease-in-out;
         }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
-        /* Full Screen Avatar */
+        /* Full Screen Avatar Fix */
         #julia-main { 
-            display: none; width: 100vw; height: 100vh; 
-            background: url('https://i.ibb.co/L6K6J8m/1000015763.jpg') no-repeat center center;
-            background-size: cover; position: relative;
+            display: none; width: 100%; height: 100%; 
+            background: url('https://i.ibb.co/L6K6J8m/1000015763.jpg?v=2') no-repeat center center;
+            background-size: cover; position: fixed; top: 0; left: 0;
         }
         
         #terminal {
-            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-            width: 85%; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px;
-            border: 1px solid #00e5ff; text-align: center; font-size: 1.1rem; color: #fff;
+            position: absolute; bottom: 10%; left: 5%; right: 5%;
+            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 15px;
+            border: 1px solid #00e5ff; text-align: center; font-size: 1.1rem;
         }
-        input { background: transparent; border: 1px solid #00e5ff; color: #fff; padding: 12px; border-radius: 8px; width: 80%; text-align: center; margin-top: 10px; }
+        input { background: #111; border: 1px solid #00e5ff; color: #fff; padding: 15px; border-radius: 10px; width: 80%; text-align: center; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -43,48 +45,56 @@
     <div id="lock-screen">
         <div class="scan-circle">
             <div class="scan-line"></div>
-            <p style="font-size: 0.9rem; z-index: 2;">SCANNING...</p>
         </div>
-        <h1 id="main-status">VISHAL SIR DETECTED</h1>
-        <div id="auth-area" style="display:none; text-align:center;">
-            <p>Boliye: "Julia i u online"</p>
-            <input type="text" id="phraseInput" placeholder="Type here..." onkeydown="if(event.key==='Enter') verify()">
+        <h2 id="main-status" style="margin-top: 20px;">VISHAL SIR DETECTED</h2>
+        <div id="auth-area" style="display:none; text-align:center; width: 100%;">
+            <p>Identity Verification: "Julia i u online"</p>
+            <input type="text" id="phraseInput" placeholder="Boliye..." onkeydown="if(event.key==='Enter') verify()">
         </div>
     </div>
 
     <div id="julia-main">
-        <div id="terminal">
-            <div id="typed-text">System Booting...</div>
-        </div>
+        <div id="terminal"><div id="typed-text">System Booting...</div></div>
     </div>
 
     <script>
-        // Force Camera Permission
-        async function init() {
-            try { await navigator.mediaDevices.getUserMedia({ video: true }); } catch(e) {}
-            setTimeout(() => { document.getElementById('auth-area').style.display = 'block'; }, 2500);
+        // Redmi Camera Reset Logic
+        async function startSystem() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: true 
+                });
+                console.log("Redmi Camera Active");
+            } catch(e) { console.log("Camera Error"); }
+            
+            setTimeout(() => { 
+                document.getElementById('auth-area').style.display = 'block';
+            }, 3000);
         }
-        init();
+        startSystem();
 
         function verify() {
-            if(document.getElementById('phraseInput').value.toLowerCase() === "julia i u online") {
+            const input = document.getElementById('phraseInput').value.toLowerCase();
+            if(input === "julia i u online") {
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('julia-main').style.display = 'block';
                 juliaSpeak("Julia is online. Welcome back Vishal sir! Maine aapko bahut miss kiya. System ab fully operational hai. Bataiye, aaj main aapki kaise help kar sakti hoon?");
-            } else { alert("Access Denied!"); }
+            } else { alert("Face mismatch! Try again."); }
         }
 
         function juliaSpeak(text) {
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'hi-IN';
             window.speechSynthesis.speak(msg);
+            
             let i = 0;
             const target = document.getElementById('typed-text');
             target.innerHTML = "";
             let interval = setInterval(() => {
-                if (i < text.length) { target.innerHTML += text.charAt(i); i++; } 
+                if (i < text.length) { target.innerHTML += text.charAt(i); i++; }
                 else { clearInterval(interval); }
-            }, 45);
+            }, 50);
         }
     </script>
 </body>
