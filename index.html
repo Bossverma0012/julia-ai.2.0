@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JULIA - VISHAL SIR'S PRIVATE AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    
+    <style>
+        body { background: radial-gradient(circle, #0a0a0a, #000); color: #00e5ff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; margin: 0; overflow: hidden; }
+        #lock-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        #julia-avatar { width: 300px; border-radius: 50%; border: 2px solid #00e5ff; box-shadow: 0 0 30px #00e5ff; transition: 0.5s; }
+        .searching { animation: pulse 2s infinite; filter: grayscale(100%); }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        #terminal { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); width: 80%; background: rgba(0,255,255,0.05); padding: 20px; border-radius: 10px; border-bottom: 3px solid #00e5ff; text-align: center; font-size: 1.2rem; }
+        input { background: transparent; border: 1px solid #00e5ff; color: #fff; padding: 10px; border-radius: 5px; text-align: center; width: 250px; outline: none; }
+    </style>
+</head>
+<body>
+
+<div id="lock-screen">
+    <img id="julia-avatar" src="https://i.ibb.co/L6K6J8m/1000015763.jpg" class="searching">
+    <h1 id="status">SCANNING FACE...</h1>
+    <div id="auth-area" style="display:none;">
+        <p>Face Verified. Provide Phrase:</p>
+        <input type="password" id="phraseInput" placeholder="Enter Secret Phrase..." onkeydown="if(event.key==='Enter') verify()">
+    </div>
+</div>
+
+<div id="terminal">
+    <div id="typed-text">Waiting for Vishal sir...</div>
+</div>
+
+<script>
+    // Julia's Brain (API Configuration)
+    const API_KEYS = ["AIzaSyDuHe3ryBjUTsogKWNwQlqUh2Lod4C2umI", "AIzaSyAn0MRuEe-9e-LOvRYAwmXmdB7uIyx5dwI"];
+    const GROQ_KEY = "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";
+
+    // Step 1: Simulate Face Recognition (Wait 3 seconds)
+    setTimeout(() => {
+        document.getElementById('status').innerText = "VISHAL SIR DETECTED";
+        document.getElementById('auth-area').style.display = 'block';
+    }, 3000);
+
+    // Step 2: Phrase Verification
+    function verify() {
+        const val = document.getElementById('phraseInput').value;
+        if(val.toLowerCase() === "julia i u online") {
+            unlockJulia();
+        } else {
+            alert("Security Breach! Access Denied.");
+        }
+    }
+
+    function unlockJulia() {
+        document.getElementById('lock-screen').style.display = 'none';
+        document.getElementById('julia-avatar').classList.remove('searching');
+        juliaSpeak("Julia is online. Welcome back Vishal sir! I missed you.");
+    }
+
+    // Step 3: Voice-First Logic
+    function juliaSpeak(text) {
+        // Chizuru Voice Engine
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = text;
+        msg.rate = 1.1; // Chizuru style speed
+        window.speechSynthesis.speak(msg);
+        
+        // Parallel Typing
+        typeText(text);
+    }
+
+    function typeText(text) {
+        let i = 0;
+        const target = document.getElementById('typed-text');
+        target.innerHTML = "";
+        const interval = setInterval(() => {
+            if (i < text.length) {
+                target.innerHTML += text.charAt(i);
+                i++;
+            } else { clearInterval(interval); }
+        }, 40);
+    }
+</script>
+</body>
+</html>
