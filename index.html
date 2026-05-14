@@ -1,36 +1,16 @@
-)<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JULIA AI - VISHAL SIR</title>
     <style>
-        /* Redmi 12 5G Full Screen Fix */
         body { background: #000; color: #00e5ff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        .glow-btn { 
-            padding: 18px 45px; border: 2px solid #00e5ff; background: transparent; 
-            color: #00e5ff; font-size: 1.3rem; border-radius: 40px; cursor: pointer;
-            box-shadow: 0 0 20px #00e5ff; font-weight: bold;
-        }
-
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .glow-btn { padding: 18px 45px; border: 2px solid #00e5ff; background: transparent; color: #00e5ff; font-size: 1.3rem; border-radius: 40px; cursor: pointer; box-shadow: 0 0 20px #00e5ff; font-weight: bold; }
         #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
-        
-        /* EXACT AVATAR IMAGE */
-        #avatar-img { 
-            width: 100%; height: 100%; object-fit: cover; 
-            position: absolute; top: 0; left: 0; z-index: 1; 
-        }
-        
-        #terminal {
-            position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10;
-            background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px;
-            border: 1px solid #00e5ff; text-align: center; color: #fff;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
-        }
-
+        #avatar-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
+        #terminal { position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px; border: 1px solid #00e5ff; text-align: center; color: #fff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
         .listening-glow { animation: glow 1.2s infinite ease-in-out; border: 2px solid #ff0000 !important; }
         @keyframes glow { 0% { box-shadow: 0 0 5px #00e5ff; } 50% { box-shadow: 0 0 25px #00e5ff; } 100% { box-shadow: 0 0 5px #00e5ff; } }
     </style>
@@ -38,8 +18,9 @@
 <body>
 
     <div id="lock-screen">
-        <h1 style="margin-bottom: 40px;">VISHAL SIR DETECTED</h1>
-        <button class="glow-btn" onclick="initJulia()">ACTIVATE JULIA</button>
+        <h1 style="margin-bottom: 20px;">VISHAL SIR DETECTED</h1>
+        <p style="color: #00e5ff; margin-bottom: 30px; font-size: 0.9rem;">Click below to grant system access</p>
+        <button class="glow-btn" onclick="forceInit()">ACTIVATE JULIA</button>
     </div>
 
     <div id="julia-main">
@@ -54,27 +35,28 @@
         recognition.lang = 'hi-IN';
         recognition.continuous = true;
 
-        async function initJulia() {
+        async function forceInit() {
             try {
-                // Mic/Camera Permission
-                await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                // Force permission request on button click
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('julia-main').style.display = 'block';
                 
-                speak("Julia is online. Welcome back Vishal sir! Aapka avatar ready hai. Bataiye main aapki kya help kar sakti hoon?");
+                // Start speaking and listening logic
+                speak("Julia is online. Welcome back Vishal sir! Sabhi permissions granted hain. Main ab aapko sun rahi hoon.");
             } catch (err) {
-                alert("Please Allow Camera and Mic to talk with Julia.");
+                console.error("Permission denied", err);
+                alert("Vishal sir, please top-left mein 'Allow' par click karein!");
             }
         }
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'hi-IN'; // Hindi voice support
-            
-            msg.onstart = () => { recognition.abort(); };
+            msg.lang = 'hi-IN';
+            msg.onstart = () => { try { recognition.stop(); } catch(e){} };
             msg.onend = () => { startListening(); };
-            
             window.speechSynthesis.speak(msg);
             document.getElementById('typed-text').innerText = text;
         }
@@ -100,6 +82,9 @@
                 speak("Samajh gayi sir, aapne kaha: " + command);
             }
         };
+
+        // Auto-restart listening if it drops
+        recognition.onend = () => { if(document.getElementById('julia-main').style.display === 'block') recognition.start(); };
     </script>
 </body>
 </html>
