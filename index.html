@@ -1,100 +1,85 @@
-)<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JULIA - VISHAL SIR</title>
     <style>
-        /* Redmi 12 5G Full Screen Fix */
-        body { background: #000; color: #00e5ff; font-family: sans-serif; margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; }
+        body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         
+        /* Fast Unlock Screen */
         #lock-screen { 
             position: fixed; inset: 0; background: #000; z-index: 999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
         
-        .scan-circle {
-            width: 70vw; height: 70vw; max-width: 300px; max-height: 300px;
-            border: 4px solid #00e5ff; border-radius: 50%;
-            box-shadow: 0 0 30px #00e5ff; position: relative; overflow: hidden;
+        .glow-btn {
+            padding: 15px 40px; border: 2px solid #00e5ff; background: transparent;
+            color: #00e5ff; font-size: 1.2rem; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 0 15px #00e5ff; transition: 0.3s;
         }
 
-        .scan-line {
-            position: absolute; width: 100%; height: 4px; background: #00e5ff;
-            top: 0; animation: scan 2s infinite ease-in-out;
-        }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* Full Screen Avatar Fix */
+        /* Full Screen Avatar for Redmi 12 5G */
         #julia-main { 
             display: none; width: 100%; height: 100%; 
-            background: url('https://i.ibb.co/L6K6J8m/1000015763.jpg?v=2') no-repeat center center;
+            background: url('https://i.ibb.co/L6K6J8m/1000015763.jpg') no-repeat center center;
             background-size: cover; position: fixed; top: 0; left: 0;
         }
         
         #terminal {
-            position: absolute; bottom: 10%; left: 5%; right: 5%;
-            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 15px;
+            position: absolute; bottom: 8%; left: 5%; right: 5%;
+            background: rgba(0,0,0,0.85); padding: 18px; border-radius: 15px;
             border: 1px solid #00e5ff; text-align: center; font-size: 1.1rem;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
         }
-        input { background: #111; border: 1px solid #00e5ff; color: #fff; padding: 15px; border-radius: 10px; width: 80%; text-align: center; font-size: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <div class="scan-circle">
-            <div class="scan-line"></div>
-        </div>
-        <h2 id="main-status" style="margin-top: 20px;">VISHAL SIR DETECTED</h2>
-        <div id="auth-area" style="display:none; text-align:center; width: 100%;">
-            <p>Identity Verification: "Julia i u online"</p>
-            <input type="text" id="phraseInput" placeholder="Boliye..." onkeydown="if(event.key==='Enter') verify()">
-        </div>
+        <h1 style="margin-bottom: 30px;">VISHAL SIR DETECTED</h1>
+        <button class="glow-btn" onclick="unlockJulia()">UNLOCK JULIA</button>
+        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.7;">Camera & Audio Active</p>
     </div>
 
     <div id="julia-main">
-        <div id="terminal"><div id="typed-text">System Booting...</div></div>
+        <div id="terminal">
+            <div id="typed-text">Julia is ready...</div>
+        </div>
     </div>
 
     <script>
-        // Redmi Camera Reset Logic
-        async function startSystem() {
+        // Automatic Camera/Mic Access for Redmi 12 5G
+        async function requestPermissions() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user" }, 
-                    audio: true 
-                });
-                console.log("Redmi Camera Active");
-            } catch(e) { console.log("Camera Error"); }
-            
-            setTimeout(() => { 
-                document.getElementById('auth-area').style.display = 'block';
-            }, 3000);
+                await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            } catch(e) { console.log("Redmi permission needed"); }
         }
-        startSystem();
+        requestPermissions();
 
-        function verify() {
-            const input = document.getElementById('phraseInput').value.toLowerCase();
-            if(input === "julia i u online") {
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('julia-main').style.display = 'block';
-                juliaSpeak("Julia is online. Welcome back Vishal sir! Maine aapko bahut miss kiya. System ab fully operational hai. Bataiye, aaj main aapki kaise help kar sakti hoon?");
-            } else { alert("Face mismatch! Try again."); }
+        function unlockJulia() {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('julia-main').style.display = 'block';
+            
+            // Julia Speaks in Hinglish
+            const welcomeText = "Julia is online. Welcome back Vishal sir! Aapka avatar ab ready hai. System fully operational ho chuka hai. Main aapki kya help kar sakti hoon?";
+            juliaSpeak(welcomeText);
         }
 
         function juliaSpeak(text) {
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'hi-IN';
+            msg.lang = 'hi-IN'; // Hindi voice with English words support
+            msg.rate = 1.0;
             window.speechSynthesis.speak(msg);
             
+            // Typing effect
             let i = 0;
             const target = document.getElementById('typed-text');
             target.innerHTML = "";
             let interval = setInterval(() => {
                 if (i < text.length) { target.innerHTML += text.charAt(i); i++; }
                 else { clearInterval(interval); }
-            }, 50);
+            }, 45);
         }
     </script>
 </body>
