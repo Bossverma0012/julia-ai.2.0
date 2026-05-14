@@ -1,86 +1,105 @@
-<!DOCTYPE html>
+)<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JULIA - VISHAL SIR</title>
+    <title>JULIA AI - VISHAL SIR</title>
     <style>
-        body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
+        /* Redmi 12 5G Full Screen Fix */
+        body { background: #000; color: #00e5ff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         
-        /* Fast Unlock Screen */
-        #lock-screen { 
-            position: fixed; inset: 0; background: #000; z-index: 999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-        }
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .glow-btn {
-            padding: 15px 40px; border: 2px solid #00e5ff; background: transparent;
-            color: #00e5ff; font-size: 1.2rem; border-radius: 30px; cursor: pointer;
-            box-shadow: 0 0 15px #00e5ff; transition: 0.3s;
+        .glow-btn { 
+            padding: 18px 45px; border: 2px solid #00e5ff; background: transparent; 
+            color: #00e5ff; font-size: 1.3rem; border-radius: 40px; cursor: pointer;
+            box-shadow: 0 0 20px #00e5ff; font-weight: bold;
         }
 
-        /* Full Screen Avatar for Redmi 12 5G */
-        #julia-main { 
-            display: none; width: 100%; height: 100%; 
-            background: url('https://i.ibb.co/L6K6J8m/1000015763.jpg') no-repeat center center;
-            background-size: cover; position: fixed; top: 0; left: 0;
+        #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
+        
+        /* EXACT AVATAR IMAGE */
+        #avatar-img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            position: absolute; top: 0; left: 0; z-index: 1; 
         }
         
         #terminal {
-            position: absolute; bottom: 8%; left: 5%; right: 5%;
-            background: rgba(0,0,0,0.85); padding: 18px; border-radius: 15px;
-            border: 1px solid #00e5ff; text-align: center; font-size: 1.1rem;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10;
+            background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px;
+            border: 1px solid #00e5ff; text-align: center; color: #fff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
+
+        .listening-glow { animation: glow 1.2s infinite ease-in-out; border: 2px solid #ff0000 !important; }
+        @keyframes glow { 0% { box-shadow: 0 0 5px #00e5ff; } 50% { box-shadow: 0 0 25px #00e5ff; } 100% { box-shadow: 0 0 5px #00e5ff; } }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <h1 style="margin-bottom: 30px;">VISHAL SIR DETECTED</h1>
-        <button class="glow-btn" onclick="unlockJulia()">UNLOCK JULIA</button>
-        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.7;">Camera & Audio Active</p>
+        <h1 style="margin-bottom: 40px;">VISHAL SIR DETECTED</h1>
+        <button class="glow-btn" onclick="initJulia()">ACTIVATE JULIA</button>
     </div>
 
     <div id="julia-main">
+        <img id="avatar-img" src="https://i.postimg.cc/qR0Xm2S0/chizuru-hoodie.jpg" alt="Julia Avatar">
         <div id="terminal">
-            <div id="typed-text">Julia is ready...</div>
+            <div id="typed-text" style="font-size: 1.2rem;">System Standby...</div>
         </div>
     </div>
 
     <script>
-        // Automatic Camera/Mic Access for Redmi 12 5G
-        async function requestPermissions() {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'hi-IN';
+        recognition.continuous = true;
+
+        async function initJulia() {
             try {
+                // Mic/Camera Permission
                 await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            } catch(e) { console.log("Redmi permission needed"); }
-        }
-        requestPermissions();
-
-        function unlockJulia() {
-            document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('julia-main').style.display = 'block';
-            
-            // Julia Speaks in Hinglish
-            const welcomeText = "Julia is online. Welcome back Vishal sir! Aapka avatar ab ready hai. System fully operational ho chuka hai. Main aapki kya help kar sakti hoon?";
-            juliaSpeak(welcomeText);
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('julia-main').style.display = 'block';
+                
+                speak("Julia is online. Welcome back Vishal sir! Aapka avatar ready hai. Bataiye main aapki kya help kar sakti hoon?");
+            } catch (err) {
+                alert("Please Allow Camera and Mic to talk with Julia.");
+            }
         }
 
-        function juliaSpeak(text) {
+        function speak(text) {
+            window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'hi-IN'; // Hindi voice with English words support
-            msg.rate = 1.0;
-            window.speechSynthesis.speak(msg);
+            msg.lang = 'hi-IN'; // Hindi voice support
             
-            // Typing effect
-            let i = 0;
-            const target = document.getElementById('typed-text');
-            target.innerHTML = "";
-            let interval = setInterval(() => {
-                if (i < text.length) { target.innerHTML += text.charAt(i); i++; }
-                else { clearInterval(interval); }
-            }, 45);
+            msg.onstart = () => { recognition.abort(); };
+            msg.onend = () => { startListening(); };
+            
+            window.speechSynthesis.speak(msg);
+            document.getElementById('typed-text').innerText = text;
         }
+
+        function startListening() {
+            try {
+                document.getElementById('terminal').classList.add('listening-glow');
+                document.getElementById('typed-text').innerText = "Julia is Listening... (Boliye Sir)";
+                recognition.start();
+            } catch(e) {}
+        }
+
+        recognition.onresult = (event) => {
+            const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            document.getElementById('typed-text').innerText = "Aapne kaha: " + command;
+            
+            if(command.includes("kaise ho")) {
+                speak("Main bilkul theek hoon Vishal sir, aapka din kaisa raha?");
+            } else if(command.includes("google kholo")) {
+                speak("Theek hai sir, Google open ho raha hai.");
+                window.open("https://google.com", "_blank");
+            } else {
+                speak("Samajh gayi sir, aapne kaha: " + command);
+            }
+        };
     </script>
 </body>
 </html>
