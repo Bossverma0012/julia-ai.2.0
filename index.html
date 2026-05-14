@@ -6,27 +6,42 @@
     <title>JULIA AI - VISHAL SIR</title>
     <style>
         body { background: #000; color: #00e5ff; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
+        
+        /* Smooth Lock Screen */
         #lock-screen { position: fixed; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .glow-btn { padding: 18px 45px; border: 2px solid #00e5ff; background: transparent; color: #00e5ff; font-size: 1.3rem; border-radius: 40px; cursor: pointer; box-shadow: 0 0 20px #00e5ff; font-weight: bold; }
+        
+        .glow-btn { 
+            padding: 18px 45px; border: 2px solid #00e5ff; background: transparent; 
+            color: #00e5ff; font-size: 1.3rem; border-radius: 40px; cursor: pointer;
+            box-shadow: 0 0 20px #00e5ff; font-weight: bold; animation: pulse 2s infinite;
+        }
+
         #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
+        
+        /* EXACT AVATAR */
         #avatar-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
-        #terminal { position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px; border: 1px solid #00e5ff; text-align: center; color: #fff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
-        .listening-glow { animation: glow 1.2s infinite ease-in-out; border: 2px solid #ff0000 !important; }
-        @keyframes glow { 0% { box-shadow: 0 0 5px #00e5ff; } 50% { box-shadow: 0 0 25px #00e5ff; } 100% { box-shadow: 0 0 5px #00e5ff; } }
+        
+        #terminal {
+            position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10;
+            background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px;
+            border: 1px solid #00e5ff; text-align: center; color: #fff;
+        }
+
+        .listening-glow { border: 2px solid #ff0000 !important; box-shadow: 0 0 20px #ff0000; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <h1 style="margin-bottom: 20px;">VISHAL SIR DETECTED</h1>
-        <p style="color: #00e5ff; margin-bottom: 30px; font-size: 0.9rem;">Click below to grant system access</p>
-        <button class="glow-btn" onclick="forceInit()">ACTIVATE JULIA</button>
+        <h1 style="color: #00e5ff; margin-bottom: 30px;">SYSTEM SECURE<br><span style="font-size: 0.9rem; color: #fff;">READY FOR VISHAL SIR</span></h1>
+        <button class="glow-btn" id="startBtn">GRANT PERMISSION & START</button>
     </div>
 
     <div id="julia-main">
-        <img id="avatar-img" src="https://i.postimg.cc/qR0Xm2S0/chizuru-hoodie.jpg" alt="Julia Avatar">
+        <img id="avatar-img" src="https://i.ibb.co/L6K6J8m/1000015763.jpg" alt="Julia">
         <div id="terminal">
-            <div id="typed-text" style="font-size: 1.2rem;">System Standby...</div>
+            <div id="typed-text">Julia is waiting for your command...</div>
         </div>
     </div>
 
@@ -35,28 +50,30 @@
         recognition.lang = 'hi-IN';
         recognition.continuous = true;
 
-        async function forceInit() {
+        // Force Permissions on Button Click
+        document.getElementById('startBtn').addEventListener('click', async () => {
             try {
-                // Force permission request on button click
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                // Requesting Mic & Camera simultaneously
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
                 
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('julia-main').style.display = 'block';
                 
-                // Start speaking and listening logic
-                speak("Julia is online. Welcome back Vishal sir! Sabhi permissions granted hain. Main ab aapko sun rahi hoon.");
+                // Unmute and Speak
+                speak("Julia is online. Welcome back Vishal sir! Aapka avatar aur system ab fully functional hai. Main aapko sun rahi hoon.");
             } catch (err) {
-                console.error("Permission denied", err);
-                alert("Vishal sir, please top-left mein 'Allow' par click karein!");
+                alert("Vishal sir, please 'Allow' par click karein taaki Julia bol aur sun sake.");
             }
-        }
+        });
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'hi-IN';
-            msg.onstart = () => { try { recognition.stop(); } catch(e){} };
+            msg.lang = 'hi-IN'; 
+            
+            msg.onstart = () => { try { recognition.stop(); } catch(e) {} };
             msg.onend = () => { startListening(); };
+            
             window.speechSynthesis.speak(msg);
             document.getElementById('typed-text').innerText = text;
         }
@@ -64,27 +81,27 @@
         function startListening() {
             try {
                 document.getElementById('terminal').classList.add('listening-glow');
-                document.getElementById('typed-text').innerText = "Julia is Listening... (Boliye Sir)";
+                document.getElementById('typed-text').innerText = "Listening... (Boliye Sir)";
                 recognition.start();
             } catch(e) {}
         }
 
         recognition.onresult = (event) => {
             const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            document.getElementById('typed-text').innerText = "Aapne kaha: " + command;
+            document.getElementById('typed-text').innerText = "Command: " + command;
             
             if(command.includes("kaise ho")) {
-                speak("Main bilkul theek hoon Vishal sir, aapka din kaisa raha?");
-            } else if(command.includes("google kholo")) {
-                speak("Theek hai sir, Google open ho raha hai.");
+                speak("Main bilkul theek hoon Vishal sir, aap kaise hain?");
+            } else if(command.includes("google kholo") || command.includes("open google")) {
+                speak("Ji sir, Google open kar rahi hoon.");
                 window.open("https://google.com", "_blank");
             } else {
-                speak("Samajh gayi sir, aapne kaha: " + command);
+                speak("Theek hai sir, maine suna: " + command);
             }
         };
 
-        // Auto-restart listening if it drops
-        recognition.onend = () => { if(document.getElementById('julia-main').style.display === 'block') recognition.start(); };
+        // Auto-restart if mic drops
+        recognition.onerror = () => { setTimeout(() => { startListening(); }, 1000); };
     </script>
 </body>
 </html>
