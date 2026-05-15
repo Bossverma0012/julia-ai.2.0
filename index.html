@@ -7,8 +7,12 @@
     <style>
         body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .master-input { background: #111; border: 2px solid #00e5ff; color: #fff; padding: 15px; border-radius: 10px; width: 70%; text-align: center; margin-top: 20px; font-size: 1.1rem; box-shadow: 0 0 10px #00e5ff; outline: none; }
+        /* New Permission Layer */
+        #setup-screen { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .start-btn { padding: 20px 40px; border: 2px solid #00e5ff; background: transparent; color: #00e5ff; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #00e5ff; font-size: 1.2rem; }
+
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .master-input { background: #111; border: 1px solid #00e5ff; color: #fff; padding: 15px; border-radius: 10px; width: 75%; text-align: center; margin-top: 20px; font-size: 1.1rem; outline: none; }
         
         #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
         #avatar-img { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; }
@@ -16,62 +20,62 @@
         #terminal {
             position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10;
             background: rgba(0,0,0,0.85); padding: 20px; border-radius: 20px;
-            border: 2px solid #00e5ff; text-align: center; transition: 0.3s;
+            border: 2px solid #00e5ff; text-align: center;
         }
         .active-glow { border-color: #00e5ff !important; box-shadow: 0 0 25px #00e5ff; }
-        .sleep-glow { border-color: #555 !important; box-shadow: none; opacity: 0.6; }
-        
-        /* Permission Hint */
-        #perm-note { color: #ff0000; font-size: 0.7rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
+    <div id="setup-screen">
+        <h1 style="margin-bottom: 30px;">SYSTEM INITIALIZING</h1>
+        <button class="start-btn" onclick="requestFullAccess()">ACTIVATE JULIA PROTOCOL</button>
+        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Required: Microphone & Camera Access</p>
+    </div>
+
     <div id="lock-screen">
-        <h2 id="lock-status">SYSTEM ENCRYPTED</h2>
-        <input type="password" id="masterCode" class="master-input" placeholder="Enter Master Phrase..." onkeydown="if(event.key==='Enter') unlock()">
-        <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.6;">Master Code: julia i u online</p>
-        <p id="perm-note">PLEASE CLICK 'ALLOW' ON THE TOP POPUP</p>
+        <h2 id="lock-status">SECURITY VERIFICATION</h2>
+        <input type="password" id="masterCode" class="master-input" placeholder="Enter Master Phrase..." onkeydown="if(event.key==='Enter') verifyAndUnlock()">
+        <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.6;">Hint: julia i u online</p>
     </div>
 
     <div id="julia-main">
         <img id="avatar-img" src="https://i.ibb.co/L6K6J8m/1000015763.jpg">
-        <div id="terminal" class="sleep-glow">
+        <div id="terminal">
             <div id="typed-text">Julia in Sleep Mode... (Clap to Wake)</div>
         </div>
     </div>
 
     <script>
+        let globalStream;
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'hi-IN';
         recognition.continuous = true;
 
-        let isSleepMode = true;
-
-        // Force Permission Logic
-        async function unlock() {
-            const code = document.getElementById('masterCode').value.toLowerCase();
-            if(code === "julia i u online") {
-                document.getElementById('perm-note').style.display = 'block';
-                
-                try {
-                    // Ye line turant browser ka permission popup khol degi
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                    
-                    // Agar permission mil gayi, toh aage badho
-                    document.getElementById('lock-screen').style.display = 'none';
-                    document.getElementById('julia-main').style.display = 'block';
-                    setupClapDetection(stream);
-                    speak("Julia is online. Main abhi sleep mode mein hoon Vishal sir. Aap clap karke mujhe wake up kar sakte hain.");
-                } catch (err) {
-                    alert("Vishal sir, jab tak aap 'Allow' nahi karenge, Julia kaam nahi kar payegi. Browser ki settings check kijiye.");
-                    console.log(err);
-                }
-            } else {
-                alert("Incorrect Code!");
+        // Force Popup on Button Click
+        async function requestFullAccess() {
+            try {
+                globalStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('lock-screen').style.display = 'flex';
+            } catch (err) {
+                alert("Vishal sir, please 'Allow' permission de dein warna system load nahi hoga.");
             }
         }
 
+        async function verifyAndUnlock() {
+            const code = document.getElementById('masterCode').value.toLowerCase();
+            if(code === "julia i u online") {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('julia-main').style.display = 'block';
+                setupClapDetection(globalStream);
+                speak("Julia is online. Welcome back Vishal sir! Main sleep mode mein hoon, wake up karne ke liye clap kijiye.");
+            } else {
+                alert("Security Breach! Access Denied.");
+            }
+        }
+
+        // Rest of the Logic (Clap, Speak, Recognition)
         function setupClapDetection(stream) {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const analyser = audioContext.createAnalyser();
@@ -82,17 +86,14 @@
             function checkClap() {
                 analyser.getByteFrequencyData(data);
                 let volume = data.reduce((a, b) => a + b) / data.length;
-                if (volume > 45 && isSleepMode) { 
-                    wakeUp();
-                }
+                if (volume > 40) { wakeUp(); }
                 requestAnimationFrame(checkClap);
             }
             checkClap();
         }
 
         function wakeUp() {
-            isSleepMode = false;
-            document.getElementById('terminal').className = 'active-glow';
+            document.getElementById('terminal').classList.add('active-glow');
             speak("Yes Vishal sir! I am awake. Boliye main aapki kya help kar sakti hoon?");
         }
 
@@ -100,35 +101,21 @@
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'hi-IN';
-            msg.onstart = () => { try { recognition.stop(); } catch(e) {} };
-            msg.onend = () => { if(!isSleepMode) startListening(); };
+            msg.onend = () => { startListening(); };
             window.speechSynthesis.speak(msg);
             document.getElementById('typed-text').innerText = text;
         }
 
         function startListening() {
-            try {
-                document.getElementById('typed-text').innerText = "Listening for Command...";
-                recognition.start();
-            } catch(e) {}
+            try { recognition.start(); } catch(e) {}
         }
 
         recognition.onresult = (event) => {
             const cmd = event.results[event.results.length - 1][0].transcript.toLowerCase();
             document.getElementById('typed-text').innerText = "Command: " + cmd;
-
-            if(cmd.includes("sleep")) {
-                isSleepMode = true;
-                document.getElementById('terminal').className = 'sleep-glow';
-                speak("Theek hai sir, main sleep mode mein ja rahi hoon. Clap to wake me up.");
-            } else if(cmd.includes("kaise ho")) {
-                speak("Main ekdam fit hoon sir! Aapka assistant robot hamesha taiyar hai.");
-            } else {
-                speak("Ji sir, maine suna: " + cmd);
-            }
+            if(cmd.includes("kaise ho")) speak("Main ekdam fit hoon sir!");
+            else speak("Ji sir, maine suna: " + cmd);
         };
-
-        recognition.onerror = () => { if(!isSleepMode) setTimeout(startListening, 500); };
     </script>
 </body>
 </html>
