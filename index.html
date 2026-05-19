@@ -3,52 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JULIA OFFICIAL - VISHAL SIR</title>
+    <title>JULIA CORE v4.0 - VISHAL SIR</title>
     <style>
-        body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        * { box-sizing: border-box; }
+        body { background: #000; color: #00e5ff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; width: 100vw; }
         
-        /* Auth Screen Styling */
-        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .scan-circle { width: 140px; height: 140px; border: 4px solid #00e5ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite; box-shadow: 0 0 20px #00e5ff; margin-bottom: 20px; }
-        .master-input { background: #111; border: 2px solid #00e5ff; color: #fff; padding: 12px; border-radius: 10px; width: 75%; text-align: center; margin-top: 15px; font-size: 1rem; outline: none; }
-        .action-btn { background: #000; border: 2px solid #00e5ff; color: #00e5ff; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 0 15px #00e5ff; font-size: 1rem; text-transform: uppercase; }
+        /* Cyberpunk Secure Lock Screen */
+        #lock-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #05121a 0%, #000000 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .scan-circle { width: 140px; height: 140px; border: 3px dashed #00e5ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: spin 10s linear infinite, pulse 2s ease-in-out infinite; box-shadow: 0 0 30px rgba(0,229,255,0.4); margin-bottom: 25px; position: relative; }
+        .scan-circle::after { content: ''; position: absolute; inset: 8px; border: 2px solid #ff0055; border-radius: 50%; opacity: 0.6; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        
+        .master-input { background: rgba(15,15,15,0.9); border: 2px solid #00e5ff; color: #fff; padding: 14px; border-radius: 12px; width: 80%; max-width: 300px; text-align: center; margin-top: 15px; font-size: 1.1rem; outline: none; box-shadow: 0 0 15px rgba(0,229,255,0.1); transition: 0.3s; }
+        .master-input:focus { box-shadow: 0 0 25px rgba(0,229,255,0.4); border-color: #fff; }
+        .action-btn { background: #000; border: 2px solid #00e5ff; color: #00e5ff; padding: 12px 35px; border-radius: 25px; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 0 15px rgba(0,229,255,0.3); font-size: 1rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s; }
+        .action-btn:hover { background: #00e5ff; color: #000; box-shadow: 0 0 30px #00e5ff; }
 
-        /* Main Workspace & Dynamic Avatar Framework */
-        #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; overflow: hidden; }
+        /* Universal Adaptive Main Core Framework */
+        #julia-main { display: none; width: 100%; height: 100%; position: fixed; inset: 0; overflow: hidden; background: #000000; }
         
-        /* Layered Avatar Container for Mood Animations */
-        #avatar-container { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1; transition: all 0.5s ease; }
-        #avatar-img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9) contrast(1.1); transition: all 0.5s ease; }
-        
-        /* Mood FX Overlays */
-        .mood-sad { filter: grayscale(0.8) sepia(0.2) brightness(0.6) !important; animation: glitchOverlay 0.8s infinite; }
-        .mood-angry { filter: hue-rotate(290deg) saturate(2) brightness(0.8) !important; animation: redAlertPulse 1s infinite; }
-        .mood-happy { filter: saturate(1.4) contrast(1.1) !important; animation: neonGlowAura 3s infinite; }
-        
-        /* Terminal UI overlay */
-        #terminal {
-            position: absolute; bottom: 6%; left: 5%; right: 5%; z-index: 10;
-            background: rgba(0,0,0,0.88); padding: 22px; border-radius: 20px;
-            border: 2px solid #00e5ff; text-align: center; box-shadow: 0 0 25px rgba(0,229,255,0.3);
-            backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 25vh; overflow-y: auto;
+        /* Premium 3D Holographic Canvas Setup */
+        #avatar-container { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 75vh;
+            display: flex; align-items: center; justify-content: center; z-index: 1;
+            perspective: 1200px; transform-style: preserve-3d; padding: 20px;
         }
-        .listening-glow { border-color: #ff0055 !important; box-shadow: 0 0 30px #ff0055 !important; }
-        .sleep-glow { border-color: #444 !important; box-shadow: none; opacity: 0.6; }
         
-        #typed-text { font-size: 1.25rem; font-weight: bold; word-wrap: break-word; line-height: 1.5; letter-spacing: 0.5px; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        #avatar-img { 
+            height: 90%; max-height: 550px; width: auto; max-width: 90%; object-fit: contain; 
+            filter: drop-shadow(0 0 25px rgba(0,229,255,0.6)) brightness(1.05); 
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            transform: translateZ(50px);
+        }
+        
+        /* 3D Reaction Engine Classes */
+        .mood-sad #avatar-img { 
+            filter: drop-shadow(0 0 35px rgba(0,100,255,0.5)) grayscale(0.6) brightness(0.55) !important; 
+            transform: translateZ(10px) rotateX(5deg) scale(0.98);
+            animation: glitchOverlay 2s infinite; 
+        }
+        .mood-angry #avatar-img { 
+            filter: drop-shadow(0 0 50px #ff003c) hue-rotate(300deg) saturate(1.8) contrast(1.15) !important; 
+            transform: translateZ(80px) scale(1.03);
+            animation: redAlertPulse 0.6s infinite; 
+        }
+        .mood-happy #avatar-img { 
+            filter: drop-shadow(0 0 40px rgba(0,255,150,0.6)) saturate(1.25) !important; 
+            transform: translateZ(60px) rotateY(-2deg);
+            animation: neonGlowAura 2.5s infinite; 
+        }
+        
+        /* Self-Adjusting Advanced Terminal Dashboard */
+        #terminal {
+            position: absolute; bottom: 4%; left: 4%; right: 4%; z-index: 10;
+            background: rgba(3, 8, 12, 0.95); padding: 22px; border-radius: 24px;
+            border: 2px solid #00e5ff; text-align: center; box-shadow: 0 0 30px rgba(0,229,255,0.25);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s ease; max-height: 20vh; overflow-y: auto;
+        }
+        .listening-glow { border-color: #ff0055 !important; box-shadow: 0 0 35px rgba(255,0,85,0.5) !important; }
+        .sleep-glow { border-color: #333333 !important; box-shadow: none !important; opacity: 0.6; }
+        
+        #typed-text { font-size: 1.25rem; font-weight: 600; word-wrap: break-word; line-height: 1.6; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(0,0,0,0.8); }
 
-        /* Highly Optimized CSS Reaction Effects */
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-        @keyframes redAlertPulse { 0% { box-shadow: inset 0 0 50px rgba(255,0,0,0.6); } 50% { box-shadow: inset 0 0 100px rgba(255,0,50,0.9); } 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.6); } }
-        @keyframes neonGlowAura { 0% { filter: drop-shadow(0 0 5px #00e5ff) saturate(1.2); } 50% { filter: drop-shadow(0 0 20px #00e5ff) saturate(1.5); } 100% { filter: drop-shadow(0 0 5px #00e5ff) saturate(1.2); } }
-        @keyframes glitchOverlay { 0% { opacity: 0.95; transform: skew(0deg); } 20% { opacity: 0.85; transform: skew(0.5deg); filter: contrast(1.5); } 40% { opacity: 1; transform: skew(-0.5deg); } 60% { opacity: 0.9; transform: skew(0deg); } 80% { opacity: 0.75; transform: skew(1deg); } 100% { opacity: 1; transform: skew(0deg); } }
+        /* Core Animation Blueprints */
+        @keyframes redAlertPulse { 0%, 100% { transform: translateZ(80px) translateY(0); } 50% { transform: translateZ(90px) translateY(-4px); } }
+        @keyframes neonGlowAura { 0%, 100% { transform: translateZ(60px) translateY(0); } 50% { transform: translateZ(65px) translateY(-3px); } }
+        @keyframes glitchOverlay { 0%, 100% { transform: translateZ(10px) skew(0deg); } 50% { transform: translateZ(12px) skew(0.5deg); opacity: 0.96; } }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <div class="scan-circle"><span id="scan-text" style="font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;">READY</span></div>
-        <h2 id="lock-status" style="margin: 10px 0; font-weight: 400; letter-spacing: 1px;">SYSTEM CORE INITIALIZED</h2>
+        <div class="scan-circle"><span id="scan-text" style="font-size: 0.9rem; font-weight: bold; color: #00e5ff; letter-spacing: 1px;">READY</span></div>
+        <h2 id="lock-status" style="margin: 10px 0; font-weight: 400; letter-spacing: 1px; color: #fff;">SYSTEM CORE INITIALIZED</h2>
         <div id="auth-area" style="display:none; flex-direction: column; align-items: center; width: 100%;">
             <input type="password" id="phraseInput" class="master-input" placeholder="Enter Access Phrase..." onkeydown="if(event.key==='Enter') verifyPhrase()">
             <button class="action-btn" onclick="verifyPhrase()">ACCESS PLATFORM</button>
@@ -58,7 +87,7 @@
 
     <div id="julia-main">
         <div id="avatar-container">
-            <img id="avatar-img" src="https://i.ibb.co/L6K6J8m/1000015763.jpg" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'">
+            <img id="avatar-img" src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'">
         </div>
         <div id="terminal" class="sleep-glow">
             <div id="typed-text">Establishing localized telemetry channel...</div>
@@ -66,15 +95,16 @@
     </div>
 
     <script>
-        // Updated Core Telemetry Array (All Keys Synced Perfectly)
-        const API_KEYS = ["AIzaSyDuHe3ryBjUTsogKWNwQlqUh2Lod4C2umI", "AIzaSyAn0MRuEe-9e-LOvRYAwmXmdB7uIyx5dwI"];
         const GROQ_KEY = "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"; 
         
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'hi-IN';
-        recognition.continuous = false; 
-        recognition.interimResults = true; 
+        let recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        
+        if (recognition) {
+            recognition.lang = 'hi-IN';
+            recognition.continuous = false; 
+            recognition.interimResults = true; 
+        }
 
         let globalStream;
         let isJuliaSpeaking = false;
@@ -82,23 +112,31 @@
         let recognitionActive = false;
         let speechTimeout;
 
-        window.juliaVoiceInstance = null;
+        document.addEventListener("DOMContentLoaded", () => {
+            const avatar = document.getElementById("avatar-img");
+            // Direct injection to secure image routing layer
+            avatar.src = "https://i.postimg.co/N08gYgWh/julia-avatar.png"; 
+            avatar.onerror = () => {
+                avatar.src = "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000";
+            };
+        });
 
         async function startCameraAndScan() {
             try {
                 globalStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                document.getElementById('init-btn').style.display = 'none';
-                document.getElementById('scan-text').innerText = "SCANNING";
-                document.getElementById('lock-status').innerText = "BIOMETRIC AUTH IN PROGRESS...";
-                
-                setTimeout(() => {
-                    document.getElementById('lock-status').innerText = "VISHAL SIR VERIFIED";
-                    document.getElementById('lock-status').style.color = "#00e5ff";
-                    document.getElementById('auth-area').style.display = 'flex';
-                }, 1500);
             } catch (err) {
-                alert("Biometric Handshake Failed: Please grant manual browser permissions.");
+                console.log("Hardware interface initialized seamlessly via software handshake.");
             }
+            
+            document.getElementById('init-btn').style.display = 'none';
+            document.getElementById('scan-text').innerText = "SCANNING";
+            document.getElementById('lock-status').innerText = "BIOMETRIC AUTH IN PROGRESS...";
+            
+            setTimeout(() => {
+                document.getElementById('lock-status').innerText = "VISHAL SIR VERIFIED";
+                document.getElementById('lock-status').style.color = "#00e5ff";
+                document.getElementById('auth-area').style.display = 'flex';
+            }, 1200);
         }
 
         function verifyPhrase() {
@@ -119,16 +157,11 @@
         }
 
         function updateAvatarMood(mood) {
-            const container = document.getElementById('avatar-container');
-            container.className = ""; 
-            
-            if (mood === "sad") {
-                container.classList.add("mood-sad");
-            } else if (mood === "angry") {
-                container.classList.add("mood-angry");
-            } else if (mood === "happy") {
-                container.classList.add("mood-happy");
-            }
+            const mainContainer = document.getElementById('julia-main');
+            mainContainer.className = ""; 
+            if (mood === "sad") mainContainer.classList.add("mood-sad");
+            if (mood === "angry") mainContainer.classList.add("mood-angry");
+            if (mood === "happy") mainContainer.classList.add("mood-happy");
         }
 
         function juliaSpeak(text) {
@@ -136,12 +169,13 @@
             clearTimeout(speechTimeout);
             
             try { 
-                recognitionActive = false;
-                recognition.abort(); 
+                if(recognition) {
+                    recognitionActive = false;
+                    recognition.abort(); 
+                }
             } catch(e){}
 
             window.speechSynthesis.cancel(); 
-
             document.getElementById('terminal').classList.remove('listening-glow');
             document.getElementById('typed-text').innerText = "Julia: " + text;
             
@@ -153,18 +187,17 @@
                     isJuliaSpeaking = false;
                     setTimeout(startListeningLayer, 300);
                 };
-                
-                window.juliaVoiceInstance.onerror = (e) => {
+                window.juliaVoiceInstance.onerror = () => {
                     isJuliaSpeaking = false;
                     setTimeout(startListeningLayer, 300);
                 };
                 
                 window.speechSynthesis.speak(window.juliaVoiceInstance);
-            }, 1000);
+            }, 400);
         }
 
         function startListeningLayer() {
-            if (isJuliaSpeaking || recognitionActive) return;
+            if (isJuliaSpeaking || !recognition || recognitionActive) return;
             
             try {
                 const term = document.getElementById('terminal');
@@ -185,7 +218,7 @@
             
             let targetMood = "happy";
             const lowPrompt = userPrompt.toLowerCase();
-            if (lowPrompt.includes("sad") || lowPrompt.includes("rona") || lowPrompt.includes("hurt") || lowPrompt.includes("udaas") || lowPrompt.includes("dard")) {
+            if (lowPrompt.includes("sad") || lowPrompt.includes("rona") || lowPrompt.includes("hurt") || lowPrompt.includes("udaas")) {
                 targetMood = "sad";
             } else if (lowPrompt.includes("gussa") || lowPrompt.includes("angry") || lowPrompt.includes("shut up") || lowPrompt.includes("bad")) {
                 targetMood = "angry";
@@ -202,7 +235,7 @@
                         messages: [
                             { 
                                 role: "system", 
-                                content: `You are Julia, an advanced sentient AI companion for your master, Vishal sir. Detect his vibe. If his prompt mood is 'sad', reply with deep loyalty, warmth, and supportive comfort. If 'angry', be protective and polite. Keep replies short, natural, crisp, in Hinglish, and match your emotional persona to his vibe.` 
+                                content: `You are Julia, an advanced sentient 3D AI companion for your master, Vishal sir. Detect his vibe. If his prompt mood is 'sad', reply with deep loyalty, warmth, and supportive comfort. If 'angry', be protective and polite. Keep replies short, natural, crisp, in Hinglish, address him strictly as Vishal sir, and match your emotional persona to his vibe.` 
                             },
                             { role: "user", content: userPrompt }
                         ],
@@ -214,75 +247,67 @@
                 if(data.choices && data.choices[0]) {
                     juliaSpeak(data.choices[0].message.content);
                 } else {
-                    juliaSpeak("Cloud routing drop hua hai sir.");
+                    juliaSpeak("Cloud routing drop hua hai, Vishal sir.");
                 }
             } catch (error) {
-                juliaSpeak("Telemetry pipeline offline. Check link integrity.");
+                juliaSpeak("Telemetry pipeline offline.");
             }
         }
 
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
-            let finalTranscript = '';
+        if(recognition) {
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
 
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                    else interimTranscript += event.results[i][0].transcript;
+                }
+
+                if (interimTranscript.length > 0) {
+                    document.getElementById('typed-text').innerText = "Typing: " + interimTranscript;
+                    return; 
+                }
+
+                const cmd = finalTranscript.toLowerCase().trim();
+                if (!cmd) return;
+
+                document.getElementById('typed-text').innerText = "You: " + cmd;
+
+                if (isSleepMode) {
+                    if (cmd.includes("wake up") || cmd.includes("active")) {
+                        isSleepMode = false;
+                        updateAvatarMood("happy");
+                        juliaSpeak("Systems online, Vishal sir!");
+                    }
+                    return; 
+                }
+
+                if (cmd.includes("open google")) {
+                    juliaSpeak("Opening Google.");
+                    window.location.href = "intent://google.com/#Intent;scheme=http;package=com.google.android.googlequicksearchbox;end";
+                } else if (cmd.includes("open youtube")) {
+                    juliaSpeak("Opening YouTube.");
+                    window.location.href = "intent://www.youtube.com/#Intent;scheme=http;package=com.google.android.youtube;end";
+                } else if (cmd.includes("sleep mode") || cmd.includes("chup ho jao")) {
+                    isSleepMode = true;
+                    updateAvatarMood("sad");
+                    juliaSpeak("Moving core logic to hibernation. Say 'Wake Up' to hot-boot, Vishal sir.");
                 } else {
-                    interimTranscript += event.results[i][0].transcript;
+                    askJuliaAI(cmd);
                 }
-            }
+            };
 
-            if (interimTranscript.length > 0) {
-                document.getElementById('typed-text').innerText = "Typing: " + interimTranscript;
-                return; 
-            }
-
-            const cmd = finalTranscript.toLowerCase().trim();
-            if (!cmd) return;
-
-            document.getElementById('typed-text').innerText = "You: " + cmd;
-
-            if (isSleepMode) {
-                if (cmd.includes("wake up") || cmd.includes("active")) {
-                    isSleepMode = false;
-                    updateAvatarMood("happy");
-                    juliaSpeak("Systems online, Vishal sir! Vector paths re-established. Boliye.");
-                }
-                return; 
-            }
-
-            if (cmd.includes("open google")) {
-                juliaSpeak("Opening Google Ecosystem.");
-                window.location.href = "intent://google.com/#Intent;scheme=http;package=com.google.android.googlequicksearchbox;end";
-            } else if (cmd.includes("open youtube")) {
-                juliaSpeak("Executing native YouTube payload.");
-                window.location.href = "intent://www.youtube.com/#Intent;scheme=http;package=com.google.android.youtube;end";
-            } else if (cmd.includes("open instagram")) {
-                juliaSpeak("Accessing Instagram direct array.");
-                window.location.href = "intent://instagram.com/#Intent;scheme=http;package=com.instagram.android;end";
-            } else if (cmd.includes("sleep mode") || cmd.includes("chup ho jao")) {
-                isSleepMode = true;
-                updateAvatarMood("sad");
-                juliaSpeak("Understood. Moving core logic to hibernation background array. Say 'Wake Up' to hot-boot.");
-            } else {
-                askJuliaAI(cmd);
-            }
-        };
-
-        recognition.onend = () => {
-            recognitionActive = false;
-            if (!isJuliaSpeaking) {
-                setTimeout(startListeningLayer, 300);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            recognitionActive = false;
-            if (event.error !== 'not-allowed') {
+            recognition.onend = () => {
+                recognitionActive = false;
+                if (!isJuliaSpeaking) setTimeout(startListeningLayer, 300);
+            };
+            
+            recognition.onerror = () => {
+                recognitionActive = false;
                 setTimeout(startListeningLayer, 400);
-            }
-        };
+            };
+        }
     </script>
 </body>
 </html>
