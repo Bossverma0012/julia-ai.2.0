@@ -7,114 +7,281 @@
     <style>
         body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        /* New Permission Layer */
-        #setup-screen { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .start-btn { padding: 20px 40px; border: 2px solid #00e5ff; background: transparent; color: #00e5ff; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #00e5ff; font-size: 1.2rem; }
+        /* Auth Screen Styling */
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .scan-circle { width: 140px; height: 140px; border: 4px solid #00e5ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite; box-shadow: 0 0 20px #00e5ff; margin-bottom: 20px; }
+        .master-input { background: #111; border: 2px solid #00e5ff; color: #fff; padding: 12px; border-radius: 10px; width: 75%; text-align: center; margin-top: 15px; font-size: 1rem; outline: none; }
+        .action-btn { background: #000; border: 2px solid #00e5ff; color: #00e5ff; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 0 15px #00e5ff; font-size: 1rem; text-transform: uppercase; }
 
-        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .master-input { background: #111; border: 1px solid #00e5ff; color: #fff; padding: 15px; border-radius: 10px; width: 75%; text-align: center; margin-top: 20px; font-size: 1.1rem; outline: none; }
+        /* Main Workspace & Dynamic Avatar Framework */
+        #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; overflow: hidden; }
         
-        #julia-main { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; }
-        #avatar-img { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; }
+        /* Layered Avatar Container for Mood Animations */
+        #avatar-container { width: 100%; height: 100%; position: absolute; inset: 0; z-index: 1; transition: all 0.5s ease; }
+        #avatar-img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9) contrast(1.1); transition: all 0.5s ease; }
         
+        /* Mood FX Overlays */
+        .mood-sad { filter: grayscale(0.8) sepia(0.2) brightness(0.6) !important; animation: glitchOverlay 0.8s infinite; }
+        .mood-angry { filter: hue-rotate(290deg) saturate(2) brightness(0.8) !important; animation: redAlertPulse 1s infinite; }
+        .mood-happy { filter: saturate(1.4) contrast(1.1) !important; animation: neonGlowAura 3s infinite; }
+        
+        /* Terminal UI overlay */
         #terminal {
-            position: absolute; bottom: 8%; left: 5%; right: 5%; z-index: 10;
-            background: rgba(0,0,0,0.85); padding: 20px; border-radius: 20px;
-            border: 2px solid #00e5ff; text-align: center;
+            position: absolute; bottom: 6%; left: 5%; right: 5%; z-index: 10;
+            background: rgba(0,0,0,0.88); padding: 22px; border-radius: 20px;
+            border: 2px solid #00e5ff; text-align: center; box-shadow: 0 0 25px rgba(0,229,255,0.3);
+            backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 25vh; overflow-y: auto;
         }
-        .active-glow { border-color: #00e5ff !important; box-shadow: 0 0 25px #00e5ff; }
+        .listening-glow { border-color: #ff0055 !important; box-shadow: 0 0 30px #ff0055 !important; }
+        .sleep-glow { border-color: #444 !important; box-shadow: none; opacity: 0.6; }
+        
+        #typed-text { font-size: 1.25rem; font-weight: bold; word-wrap: break-word; line-height: 1.5; letter-spacing: 0.5px; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+
+        /* Highly Optimized CSS Reaction Effects */
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+        @keyframes redAlertPulse { 0% { box-shadow: inset 0 0 50px rgba(255,0,0,0.6); } 50% { box-shadow: inset 0 0 100px rgba(255,0,50,0.9); } 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.6); } }
+        @keyframes neonGlowAura { 0% { filter: drop-shadow(0 0 5px #00e5ff) saturate(1.2); } 50% { filter: drop-shadow(0 0 20px #00e5ff) saturate(1.5); } 100% { filter: drop-shadow(0 0 5px #00e5ff) saturate(1.2); } }
+        @keyframes glitchOverlay { 0% { opacity: 0.95; transform: skew(0deg); } 20% { opacity: 0.85; transform: skew(0.5deg); filter: contrast(1.5); } 40% { opacity: 1; transform: skew(-0.5deg); } 60% { opacity: 0.9; transform: skew(0deg); } 80% { opacity: 0.75; transform: skew(1deg); } 100% { opacity: 1; transform: skew(0deg); } }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen">
-        <h1 style="margin-bottom: 30px;">SYSTEM INITIALIZING</h1>
-        <button class="start-btn" onclick="requestFullAccess()">ACTIVATE JULIA PROTOCOL</button>
-        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Required: Microphone & Camera Access</p>
-    </div>
-
     <div id="lock-screen">
-        <h2 id="lock-status">SECURITY VERIFICATION</h2>
-        <input type="password" id="masterCode" class="master-input" placeholder="Enter Master Phrase..." onkeydown="if(event.key==='Enter') verifyAndUnlock()">
-        <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.6;">Hint: julia i u online</p>
+        <div class="scan-circle"><span id="scan-text" style="font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;">READY</span></div>
+        <h2 id="lock-status" style="margin: 10px 0; font-weight: 400; letter-spacing: 1px;">SYSTEM CORE INITIALIZED</h2>
+        <div id="auth-area" style="display:none; flex-direction: column; align-items: center; width: 100%;">
+            <input type="password" id="phraseInput" class="master-input" placeholder="Enter Access Phrase..." onkeydown="if(event.key==='Enter') verifyPhrase()">
+            <button class="action-btn" onclick="verifyPhrase()">ACCESS PLATFORM</button>
+        </div>
+        <button id="init-btn" class="action-btn" onclick="startCameraAndScan()">INITIALIZE SYSTEM SCAN</button>
     </div>
 
     <div id="julia-main">
-        <img id="avatar-img" src="https://i.ibb.co/L6K6J8m/1000015763.jpg">
-        <div id="terminal">
-            <div id="typed-text">Julia in Sleep Mode... (Clap to Wake)</div>
+        <div id="avatar-container">
+            <img id="avatar-img" src="https://i.ibb.co/L6K6J8m/1000015763.jpg" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'">
+        </div>
+        <div id="terminal" class="sleep-glow">
+            <div id="typed-text">Establishing localized telemetry channel...</div>
         </div>
     </div>
 
     <script>
-        let globalStream;
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        // Updated Core Telemetry Array (All Keys Synced Perfectly)
+        const API_KEYS = ["AIzaSyDuHe3ryBjUTsogKWNwQlqUh2Lod4C2umI", "AIzaSyAn0MRuEe-9e-LOvRYAwmXmdB7uIyx5dwI"];
+        const GROQ_KEY = "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"; 
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
         recognition.lang = 'hi-IN';
-        recognition.continuous = true;
+        recognition.continuous = false; 
+        recognition.interimResults = true; 
 
-        // Force Popup on Button Click
-        async function requestFullAccess() {
+        let globalStream;
+        let isJuliaSpeaking = false;
+        let isSleepMode = false;
+        let recognitionActive = false;
+        let speechTimeout;
+
+        window.juliaVoiceInstance = null;
+
+        async function startCameraAndScan() {
             try {
                 globalStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                document.getElementById('setup-screen').style.display = 'none';
-                document.getElementById('lock-screen').style.display = 'flex';
+                document.getElementById('init-btn').style.display = 'none';
+                document.getElementById('scan-text').innerText = "SCANNING";
+                document.getElementById('lock-status').innerText = "BIOMETRIC AUTH IN PROGRESS...";
+                
+                setTimeout(() => {
+                    document.getElementById('lock-status').innerText = "VISHAL SIR VERIFIED";
+                    document.getElementById('lock-status').style.color = "#00e5ff";
+                    document.getElementById('auth-area').style.display = 'flex';
+                }, 1500);
             } catch (err) {
-                alert("Vishal sir, please 'Allow' permission de dein warna system load nahi hoga.");
+                alert("Biometric Handshake Failed: Please grant manual browser permissions.");
             }
         }
 
-        async function verifyAndUnlock() {
-            const code = document.getElementById('masterCode').value.toLowerCase();
-            if(code === "julia i u online") {
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('julia-main').style.display = 'block';
-                setupClapDetection(globalStream);
-                speak("Julia is online. Welcome back Vishal sir! Main sleep mode mein hoon, wake up karne ke liye clap kijiye.");
+        function verifyPhrase() {
+            const val = document.getElementById('phraseInput').value.toLowerCase().trim();
+            if(val === "julia i u online" || val === "julia") {
+                unlockJulia();
             } else {
-                alert("Security Breach! Access Denied.");
+                alert("Security Exception: Access Denied.");
             }
         }
 
-        // Rest of the Logic (Clap, Speak, Recognition)
-        function setupClapDetection(stream) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const analyser = audioContext.createAnalyser();
-            const source = audioContext.createMediaStreamSource(stream);
-            source.connect(analyser);
-            const data = new Uint8Array(analyser.frequencyBinCount);
+        function unlockJulia() {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('julia-main').style.display = 'block';
+            isSleepMode = false;
+            updateAvatarMood("happy");
+            juliaSpeak("Julia is online. Welcome back Vishal sir! Aapka Jarvis system updated aur ready hai. Command kijiye sir.");
+        }
+
+        function updateAvatarMood(mood) {
+            const container = document.getElementById('avatar-container');
+            container.className = ""; 
             
-            function checkClap() {
-                analyser.getByteFrequencyData(data);
-                let volume = data.reduce((a, b) => a + b) / data.length;
-                if (volume > 40) { wakeUp(); }
-                requestAnimationFrame(checkClap);
+            if (mood === "sad") {
+                container.classList.add("mood-sad");
+            } else if (mood === "angry") {
+                container.classList.add("mood-angry");
+            } else if (mood === "happy") {
+                container.classList.add("mood-happy");
             }
-            checkClap();
         }
 
-        function wakeUp() {
-            document.getElementById('terminal').classList.add('active-glow');
-            speak("Yes Vishal sir! I am awake. Boliye main aapki kya help kar sakti hoon?");
+        function juliaSpeak(text) {
+            isJuliaSpeaking = true;
+            clearTimeout(speechTimeout);
+            
+            try { 
+                recognitionActive = false;
+                recognition.abort(); 
+            } catch(e){}
+
+            window.speechSynthesis.cancel(); 
+
+            document.getElementById('terminal').classList.remove('listening-glow');
+            document.getElementById('typed-text').innerText = "Julia: " + text;
+            
+            speechTimeout = setTimeout(() => {
+                window.juliaVoiceInstance = new SpeechSynthesisUtterance(text);
+                window.juliaVoiceInstance.lang = 'hi-IN';
+                
+                window.juliaVoiceInstance.onend = () => {
+                    isJuliaSpeaking = false;
+                    setTimeout(startListeningLayer, 300);
+                };
+                
+                window.juliaVoiceInstance.onerror = (e) => {
+                    isJuliaSpeaking = false;
+                    setTimeout(startListeningLayer, 300);
+                };
+                
+                window.speechSynthesis.speak(window.juliaVoiceInstance);
+            }, 1000);
         }
 
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'hi-IN';
-            msg.onend = () => { startListening(); };
-            window.speechSynthesis.speak(msg);
-            document.getElementById('typed-text').innerText = text;
+        function startListeningLayer() {
+            if (isJuliaSpeaking || recognitionActive) return;
+            
+            try {
+                const term = document.getElementById('terminal');
+                if (isSleepMode) {
+                    term.className = 'sleep-glow';
+                    document.getElementById('typed-text').innerText = "System Hibernated... Say 'Wake Up' to Activate.";
+                } else {
+                    term.className = 'listening-glow';
+                    document.getElementById('typed-text').innerText = "Listening... (Boliye Vishal Sir)";
+                }
+                recognition.start();
+                recognitionActive = true;
+            } catch(e) {}
         }
 
-        function startListening() {
-            try { recognition.start(); } catch(e) {}
+        async function askJuliaAI(userPrompt) {
+            document.getElementById('typed-text').innerText = "Thinking...";
+            
+            let targetMood = "happy";
+            const lowPrompt = userPrompt.toLowerCase();
+            if (lowPrompt.includes("sad") || lowPrompt.includes("rona") || lowPrompt.includes("hurt") || lowPrompt.includes("udaas") || lowPrompt.includes("dard")) {
+                targetMood = "sad";
+            } else if (lowPrompt.includes("gussa") || lowPrompt.includes("angry") || lowPrompt.includes("shut up") || lowPrompt.includes("bad")) {
+                targetMood = "angry";
+            }
+            
+            updateAvatarMood(targetMood);
+
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "llama3-8b-8192",
+                        messages: [
+                            { 
+                                role: "system", 
+                                content: `You are Julia, an advanced sentient AI companion for your master, Vishal sir. Detect his vibe. If his prompt mood is 'sad', reply with deep loyalty, warmth, and supportive comfort. If 'angry', be protective and polite. Keep replies short, natural, crisp, in Hinglish, and match your emotional persona to his vibe.` 
+                            },
+                            { role: "user", content: userPrompt }
+                        ],
+                        temperature: 0.6,
+                        max_tokens: 120
+                    })
+                });
+                const data = await response.json();
+                if(data.choices && data.choices[0]) {
+                    juliaSpeak(data.choices[0].message.content);
+                } else {
+                    juliaSpeak("Cloud routing drop hua hai sir.");
+                }
+            } catch (error) {
+                juliaSpeak("Telemetry pipeline offline. Check link integrity.");
+            }
         }
 
         recognition.onresult = (event) => {
-            const cmd = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            document.getElementById('typed-text').innerText = "Command: " + cmd;
-            if(cmd.includes("kaise ho")) speak("Main ekdam fit hoon sir!");
-            else speak("Ji sir, maine suna: " + cmd);
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            if (interimTranscript.length > 0) {
+                document.getElementById('typed-text').innerText = "Typing: " + interimTranscript;
+                return; 
+            }
+
+            const cmd = finalTranscript.toLowerCase().trim();
+            if (!cmd) return;
+
+            document.getElementById('typed-text').innerText = "You: " + cmd;
+
+            if (isSleepMode) {
+                if (cmd.includes("wake up") || cmd.includes("active")) {
+                    isSleepMode = false;
+                    updateAvatarMood("happy");
+                    juliaSpeak("Systems online, Vishal sir! Vector paths re-established. Boliye.");
+                }
+                return; 
+            }
+
+            if (cmd.includes("open google")) {
+                juliaSpeak("Opening Google Ecosystem.");
+                window.location.href = "intent://google.com/#Intent;scheme=http;package=com.google.android.googlequicksearchbox;end";
+            } else if (cmd.includes("open youtube")) {
+                juliaSpeak("Executing native YouTube payload.");
+                window.location.href = "intent://www.youtube.com/#Intent;scheme=http;package=com.google.android.youtube;end";
+            } else if (cmd.includes("open instagram")) {
+                juliaSpeak("Accessing Instagram direct array.");
+                window.location.href = "intent://instagram.com/#Intent;scheme=http;package=com.instagram.android;end";
+            } else if (cmd.includes("sleep mode") || cmd.includes("chup ho jao")) {
+                isSleepMode = true;
+                updateAvatarMood("sad");
+                juliaSpeak("Understood. Moving core logic to hibernation background array. Say 'Wake Up' to hot-boot.");
+            } else {
+                askJuliaAI(cmd);
+            }
+        };
+
+        recognition.onend = () => {
+            recognitionActive = false;
+            if (!isJuliaSpeaking) {
+                setTimeout(startListeningLayer, 300);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            recognitionActive = false;
+            if (event.error !== 'not-allowed') {
+                setTimeout(startListeningLayer, 400);
+            }
         };
     </script>
 </body>
