@@ -3,42 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>JULIA V5.1 - STABLE</title>
+    <title>JULIA V6.0 - FINAL</title>
     <style>
-        body { margin: 0; background: #000; color: #00e5ff; font-family: sans-serif; overflow: hidden; height: 100vh; transition: background 0.5s ease; }
+        body { margin: 0; background: #000; color: #00e5ff; font-family: sans-serif; overflow: hidden; height: 100vh; }
+        
+        /* Lock Screen */
         #lock-screen { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        input { padding: 15px; border-radius: 10px; border: 2px solid #00e5ff; background: #111; color: #fff; text-align: center; margin-bottom: 10px; width: 80%; }
+        
+        /* Main UI */
         #julia-main { display: none; width: 100vw; height: 100vh; position: fixed; inset: 0; }
         #avatar-container { width: 100%; height: 70vh; display: flex; justify-content: center; align-items: center; }
-        #avatar-img { height: 85%; width: auto; object-fit: contain; transition: transform 0.5s ease; }
         
-        #terminal { position: absolute; bottom: 30px; left: 10px; right: 10px; text-align: center; color: #fff; padding: 15px; border: 1px solid #00e5ff; border-radius: 10px; background: rgba(0,0,0,0.8); }
+        #avatar-img { 
+            height: 70vh; width: auto; max-width: 95%; object-fit: contain; 
+            transition: transform 0.5s ease;
+        }
         
-        .rotate-360 { animation: spin360 1s ease-in-out; }
-        @keyframes spin360 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .swing { animation: swingMotion 2s infinite ease-in-out; }
-        @keyframes swingMotion { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        #terminal { position: absolute; bottom: 20px; width: 90%; left: 5%; text-align: center; color: #fff; padding: 15px; border: 1px solid #00e5ff; border-radius: 10px; background: rgba(0,0,0,0.8); font-size: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
         <input type="text" id="pass" placeholder="Enter Access Phrase">
-        <button onclick="checkAccess()" style="padding:15px 30px; background:#00e5ff; border:none; border-radius:10px;">ACTIVATE</button>
+        <button onclick="checkAccess()" style="padding:15px 30px; background:#00e5ff; border:none; border-radius:10px;">ACTIVATE SYSTEM</button>
     </div>
 
     <div id="julia-main">
         <div id="avatar-container">
-            <img id="avatar-img" src="https://i.postimg.co/N08gYgWh/julia-avatar.png">
+            <img id="avatar-img" src="https://i.postimg.co/N08gYgWh/julia-avatar.png" onerror="this.src='https://via.placeholder.com/300?text=Julia'">
         </div>
-        <div id="terminal">Julia Initialized...</div>
+        <div id="terminal">System Ready...</div>
     </div>
 
     <script>
         const GROQ_KEY = "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";
-        const avatar = document.getElementById('avatar-img');
         const term = document.getElementById('terminal');
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        
         recognition.lang = 'hi-IN';
+        recognition.interimResults = false;
 
         function checkAccess() {
             if(document.getElementById('pass').value.trim() === "Julia i u online") {
@@ -49,26 +54,17 @@
             }
         }
 
-        function speak(text) {
-            term.innerText = text;
-            let u = new SpeechSynthesisUtterance(text);
-            u.lang = 'hi-IN';
-            u.onend = () => {
-                term.innerText = "Listening... (Boliye Vishal Sir)";
-                recognition.start();
-            };
-            window.speechSynthesis.speak(u);
-        }
+        // Stability Mechanism: Auto-restart listening if it stops
+        recognition.onend = () => {
+            if(document.getElementById('julia-main').style.display === 'block') {
+                setTimeout(() => { recognition.start(); }, 1000);
+            }
+        };
 
         recognition.onresult = async (e) => {
             let t = e.results[0][0].transcript;
             term.innerText = "You: " + t;
             
-            // Emotion Logic
-            if(t.includes("gussa")) avatar.className = 'rotate-360';
-            else if(t.includes("khush")) avatar.className = 'swing';
-            else avatar.className = '';
-
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
@@ -77,6 +73,14 @@
             const data = await res.json();
             speak(data.choices[0].message.content);
         };
+
+        function speak(text) {
+            term.innerText = "Julia: " + text;
+            let u = new SpeechSynthesisUtterance(text);
+            u.lang = 'hi-IN';
+            u.onend = () => { term.innerText = "Listening..."; };
+            window.speechSynthesis.speak(u);
+        }
     </script>
 </body>
 </html>
